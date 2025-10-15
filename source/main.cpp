@@ -79,56 +79,46 @@ public:
 
 	void LU_decomposition(bool need_to_print = 0) {
 		const size_t n = size;
-		const size_t sz = n * (n + 1) / 2;
 
-		Type* L = new Type[sz];
-		Type* U = new Type[sz];
-		
+		Type* L = new Type[n * n](); 
+		Type* U = new Type[n * n](); 
 		Type s;
 		for (size_t i = 0; i < n; i++) {
-			L[i * (i + 1) / 2 + i] = 1;
-		}
-		for (size_t i = 0; i < n; i++) {
-			Type* L_row = L + (i * (i + 1) / 2);  // Начало i-й строки в L
-			Type* U_row = U + (n * i - i * (i - 1) / 2);  // Начало i-й строки в U
-			Type* A_row = this->array + i * n; // Начало i-й строки в A
-			for (size_t j = 0; j < i; j++) {
-				s = 0;
-				for (size_t k = 0; k < j; k++) {
-					s += L_row[k] * U[n * k - k * (k - 1) / 2 + j];
-				}
-				L_row[j] = (A_row[j] - s) / U[n * j - j * (j - 1) / 2 + j];
-			}
 			for (size_t j = i; j < n; j++) {
 				s = 0;
 				for (size_t k = 0; k < i; k++) {
-					s += L_row[k] * U[n * k - k * (k - 1) / 2 + j];
+					s += L[i * n + k] * U[k * n + j];
 				}
-				U_row[j] = A_row[j] - s;
+				U[i * n + j] = array[i * n + j] - s;
 			}
+
+			for (size_t j = i + 1; j < n; j++) {
+				s = 0;
+				for (size_t k = 0; k < i; k++) {
+					s += L[j * n + k] * U[k * n + i];
+				}
+				L[j * n + i] = (array[j * n + i] - s) / U[i * n + i];
+			}
+			L[i * n + i] = 1;
 		}
+
 		if (need_to_print) {
 			cout << "Matrix L:\n";
 			for (size_t i = 0; i < n; i++) {
-				for (size_t j = 0; j < n; j++)
-				{
-					if (i < j) cout << 0;
-					else cout << L[i + (i + 1) / 2 + j];
-					cout << ' ';
+				for (size_t j = 0; j < n; j++) {
+					cout << L[i * n + j] << " ";
 				}
 				cout << endl;
 			}
 			cout << "Matrix U:\n";
 			for (size_t i = 0; i < n; i++) {
-				for (size_t j = 0; j < n; j++)
-				{
-					if (i > j) cout << 0;
-					else cout << U[n * i - i * (i - 1) / 2 + j];
-					cout << ' ';
+				for (size_t j = 0; j < n; j++) {
+					cout << U[i * n + j] << " ";
 				}
 				cout << endl;
 			}
 		}
+		delete[] L; delete[] U;
 	}
 
 	friend istream& operator>>(istream& istr, SquareMatrix& m) {
