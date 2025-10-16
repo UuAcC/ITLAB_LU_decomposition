@@ -9,7 +9,11 @@ private:
 	Type* array;
 	static constexpr size_t TypeSize = sizeof(Type);
 public:
-	SquareMatrix(size_t s) : size(s) { array = new Type[size * size]{}; }
+	SquareMatrix(size_t s, Type* in_arr = nullptr) : size(s) { 
+		array = new Type[size * size]{}; 
+		if (in_arr != nullptr)
+			std::copy(in_arr, in_arr + size * size, array);
+	}
 	~SquareMatrix() { delete[] array; }
 
 	SquareMatrix(const SquareMatrix& m) {
@@ -52,7 +56,8 @@ public:
 		return array[i * size + j];
 	}
 
-	SquareMatrix operator*(const SquareMatrix& m) {
+	// пока самая простая реализация для тестов
+	SquareMatrix operator*(const SquareMatrix& m) { 
 		if (size != m.size)
 			throw invalid_argument("Matrix sizes must be equal");
 
@@ -77,48 +82,43 @@ public:
 		return res;
 	}
 
-	void LU_decomposition(bool need_to_print = 0) {
-		const size_t n = size;
+	SquareMatrix get_LU() {
+		Type* A = new Type[size * size];
+		std::copy(array, array + size * size, A);
+		size_t k_iter_max = size - 1;
+		for (size_t k = 0; k < k_iter_max; k++) {
+			for (size_t i = k + 1; i < size; i++)
+				A[i * size + k] /= A[k * size + k];
+			for (size_t j = k + 1; j < size; j++) {
+				for (size_t i = k + 1; i < size; i++)
+					A[i * size + j] -= A[i * size + k] * A[k * size + j];
+			}
+		}
+		SquareMatrix res(size, A); delete[] A;
+		return res;
+	}
 
-		Type* L = new Type[n * n](); 
-		Type* U = new Type[n * n](); 
-		Type s;
+	friend void print_LU(const SquareMatrix& m) {
+		Type* arr = m.array;
+		const size_t n = m.size;
+		cout << "Matrix L:\n";
 		for (size_t i = 0; i < n; i++) {
-			for (size_t j = i; j < n; j++) {
-				s = 0;
-				for (size_t k = 0; k < i; k++) {
-					s += L[i * n + k] * U[k * n + j];
-				}
-				U[i * n + j] = array[i * n + j] - s;
+			for (size_t j = 0; j < n; j++) {
+				if (j < i) cout << arr[i * n + j];
+				else cout << (int)(i == j);
+				cout << " ";
 			}
-
-			for (size_t j = i + 1; j < n; j++) {
-				s = 0;
-				for (size_t k = 0; k < i; k++) {
-					s += L[j * n + k] * U[k * n + i];
-				}
-				L[j * n + i] = (array[j * n + i] - s) / U[i * n + i];
-			}
-			L[i * n + i] = 1;
+			cout << endl;
 		}
-
-		if (need_to_print) {
-			cout << "Matrix L:\n";
-			for (size_t i = 0; i < n; i++) {
-				for (size_t j = 0; j < n; j++) {
-					cout << L[i * n + j] << " ";
-				}
-				cout << endl;
+		cout << "Matrix U:\n";
+		for (size_t i = 0; i < n; i++) {
+			for (size_t j = 0; j < n; j++) {
+				if (j >= i) cout << arr[i * n + j];
+				else cout << 0;
+				cout << " ";
 			}
-			cout << "Matrix U:\n";
-			for (size_t i = 0; i < n; i++) {
-				for (size_t j = 0; j < n; j++) {
-					cout << U[i * n + j] << " ";
-				}
-				cout << endl;
-			}
+			cout << endl;
 		}
-		delete[] L; delete[] U;
 	}
 
 	friend istream& operator>>(istream& istr, SquareMatrix& m) {
@@ -132,7 +132,7 @@ public:
 		size_t n = m.size;
 		for (size_t i = 0; i < n; i++) {
 			for (size_t j = 0; j < n; j++)
-				ostr << m.array[i * n + j];
+				ostr << m.array[i * n + j] << " ";
 			ostr << endl;
 		}
 		return ostr;
@@ -147,7 +147,8 @@ int main()
 	SquareMatrix A(n);
 	cout << "Enter matrix A:\n"; cin >> A;
 
-	A.LU_decomposition(1);
+	SquareMatrix LU = A.get_LU();
+	print_LU(LU);
 
 	return 0;
 }
