@@ -83,18 +83,16 @@ public:
 	}
 
 	SquareMatrix get_LU() {
-		Type* A = new Type[size * size];
-		std::copy(array, array + size * size, A);
+		SquareMatrix res(*this);
 		size_t k_iter_max = size - 1;
 		for (size_t k = 0; k < k_iter_max; k++) {
 			for (size_t i = k + 1; i < size; i++)
-				A[i * size + k] /= A[k * size + k];
+				res.at(i, k) /= res.at(k, k);
 			for (size_t j = k + 1; j < size; j++) {
 				for (size_t i = k + 1; i < size; i++)
-					A[i * size + j] -= A[i * size + k] * A[k * size + j];
+					res.at(i, j) -= res.at(i, k) * res.at(k, j);
 			}
-		}
-		SquareMatrix res(size, A); delete[] A;
+		} 
 		return res;
 	}
 
