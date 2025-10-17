@@ -84,13 +84,17 @@ public:
 
 	SquareMatrix get_LU() {
 		SquareMatrix res(*this);
+		Type*& m = res.array;
 		size_t k_iter_max = size - 1;
 		for (size_t k = 0; k < k_iter_max; k++) {
+			Type* A_ik_p = m + k; 
+			Type A_kk = m[k * size + k];
 			for (size_t i = k + 1; i < size; i++)
-				res.at(i, k) /= res.at(k, k);
+				A_ik_p[i * size] /= A_kk;
 			for (size_t j = k + 1; j < size; j++) {
+				Type U_kj = m[k * size + j];
 				for (size_t i = k + 1; i < size; i++)
-					res.at(i, j) -= res.at(i, k) * res.at(k, j);
+					m[i * size + j] -= A_ik_p[i * size] * U_kj;
 			}
 		} 
 		return res;
