@@ -2,13 +2,15 @@
 #include "square_matrix.h"
 
 #include <chrono>
-#include <random>
+using namespace chrono;
+
+#define TP steady_clock::time_point 
+#define NOW steady_clock::now()
 
 std::vector<bool(*)()> TestSystem::tests;
 
 void TestSystem::add_tests() {
 	tests.push_back(TestSystem::test1);
-	tests.push_back(TestSystem::test_time);
 }
 
 void TestSystem::run_all_tests() {
@@ -18,6 +20,7 @@ void TestSystem::run_all_tests() {
 		last_res = (*TestPtr)();
 		cout << ((last_res) ? "true" : "false") << endl;
 	}
+	test_time();
 }
 
 bool TestSystem::test1() {
@@ -34,14 +37,34 @@ bool TestSystem::test1() {
 	LU.decompose_LU(L, U);
 	SquareMatrix Res = L * U;
 
-	//print_LU(LU);
-	//cout << endl << Res;
+	print_LU(LU);
+	cout << endl << Res;
+
 	cout << "Test1: ";
 	return A == Res;
 }
 
 bool TestSystem::test_time() {
+	auto now = system_clock::now();
+	srand(now.time_since_epoch().count());
 
-	cout << "Test time: ";
+	TP start_init = NOW;
+	const size_t n = 1000;
+	SquareMatrix A(n);
+	for (size_t i = 0; i < n; i++) {
+		for (size_t j = 0; j < n; j++) {
+			A.at(i, j) = static_cast<double>(rand());
+		}
+	} cout << "\nTime for init random matrix: "
+		<< duration_cast<milliseconds>(NOW - start_init).count() << "ms";
+
+	TP start_LU = NOW;
+	SquareMatrix LU = A.get_LU();
+	cout << "\nTime for LU decomposition: "
+		<< duration_cast<milliseconds>(NOW - start_LU).count() << "ms";
+
+	cout << "\nTotal time: " 
+		<< duration_cast<milliseconds>(NOW - start_init).count() << "ms";
+
 	return true;
 }
