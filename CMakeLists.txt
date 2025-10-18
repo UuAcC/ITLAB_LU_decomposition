@@ -4,4 +4,7 @@ set(project_name "Matrix_Project")
 
 project(${project_name})
 
-add_executable(${project_name} source/main.cpp)
+file(GLOB hdrs "source/*.h*")
+file(GLOB srcs "source/*.cpp")
+
+add_executable(${project_name} ${srcs} ${hdrs})
