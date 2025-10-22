@@ -14,11 +14,11 @@ void TestSystem::add_tests() {
 }
 
 void TestSystem::run_all_tests() {
-	cout << "TestSystem:\n\n";
+	std::cout << "TestSystem:\n\n";
 	add_tests(); bool last_res;
 	for (auto TestPtr : tests) {
 		last_res = (*TestPtr)();
-		cout << ((last_res) ? "true" : "false") << endl;
+		std::cout << ((last_res) ? "true" : "false") << endl;
 	}
 	test_time();
 }
@@ -38,9 +38,9 @@ bool TestSystem::test1() {
 	SquareMatrix Res = L * U;
 
 	print_LU(LU);
-	cout << endl << Res;
+	std::cout << endl << Res;
 
-	cout << "Test1: ";
+	std::cout << "Test1: ";
 	return A == Res;
 }
 
@@ -49,21 +49,21 @@ bool TestSystem::test_time() {
 	srand(now.time_since_epoch().count());
 
 	TP start_init = NOW;
-	const size_t n = 1000;
+	const size_t n = 10000;
 	SquareMatrix A(n);
 	for (size_t i = 0; i < n; i++) {
 		for (size_t j = 0; j < n; j++) {
-			A.at(i, j) = static_cast<double>(rand());
+			A.at(i, j) = static_cast<double>(rand()); // используем random
 		}
-	} cout << "\nTime for init random matrix: "
+	} std::cout << "\nTime for init random matrix: "
 		<< duration_cast<milliseconds>(NOW - start_init).count() << "ms";
 
 	TP start_LU = NOW;
 	SquareMatrix LU = A.get_LU();
-	cout << "\nTime for LU decomposition: "
+	std::cout << "\nTime for LU decomposition: "
 		<< duration_cast<milliseconds>(NOW - start_LU).count() << "ms";
 
-	cout << "\nTotal time: " 
+	std::cout << "\nTotal time: "
 		<< duration_cast<milliseconds>(NOW - start_init).count() << "ms";
 
 	return true;

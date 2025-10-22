@@ -27,7 +27,10 @@ public:
 	SquareMatrix operator*(const SquareMatrix& m);
 	bool operator==(const SquareMatrix& m);
 
-	SquareMatrix get_LU();
+	// сюда оператор круглые скобки и здесь же реализовать, чтоб был инлайн (индексация)
+
+	SquareMatrix get_LU(); // сделать войд принимать матрицу
+	// из матрицы, в которой хранятся L и U получает, соответственно, L и U
 	void decompose_LU(SquareMatrix& L, SquareMatrix& U);
 
 	friend void print_LU(const SquareMatrix& m);

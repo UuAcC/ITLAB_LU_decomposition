@@ -19,6 +19,7 @@ SquareMatrix& SquareMatrix::operator=(const SquareMatrix& m) {
 	size = m.size;
 	array = new Type[size * size];
 	memcpy(array, m.array, size * size * TypeSize);
+	return *this;
 }
 
 SquareMatrix::SquareMatrix(SquareMatrix&& m) noexcept {
@@ -48,11 +49,10 @@ const Type& SquareMatrix::at(size_t i, size_t j) const {
 	return array[i * size + j];
 }
 
-// пока самая простая реализация для тестов
 SquareMatrix SquareMatrix::operator*(const SquareMatrix& m) {
 	if (size != m.size)
 		throw invalid_argument("Matrix sizes must be equal");
-
+	// проверку условий можно убрать
 	SquareMatrix res(size);
 	const size_t n = size;
 
@@ -91,16 +91,15 @@ SquareMatrix SquareMatrix::get_LU() {
 		Type A_kk = m[k * size + k];
 		for (size_t i = k + 1; i < size; i++)
 			A_ik_p[i * size] /= A_kk;
-		for (size_t j = k + 1; j < size; j++) {
+		for (size_t j = k + 1; j < size; j++) { // попробовать поменять местами, по возможности параллелим этот
 			Type U_kj = m[k * size + j];
 			for (size_t i = k + 1; i < size; i++)
 				m[i * size + j] -= A_ik_p[i * size] * U_kj;
 		}
 	}
 	return res;
-}
+} 
 
-// из матрицы, в которой хранятся L и U получает, соответственно, L и U
 void SquareMatrix::decompose_LU(SquareMatrix& L, SquareMatrix& U) {
 	const size_t n = size;
 	for (size_t i = 0; i < n; i++)
