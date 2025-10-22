@@ -7,7 +7,7 @@ private:
 	static std::vector<TestPtr> tests;
 
 	static bool test1(); // тест на работоспособность 3х3
-	static bool test_time(); // тест на оптимизацию и время выполнения
+	static bool test_time(size_t how_many_times = 1); // тест на оптимизацию и время выполнения
 
 	static void add_tests();
 public:
