@@ -50,8 +50,8 @@ const Type& SquareMatrix::at(size_t i, size_t j) const {
 }
 
 SquareMatrix SquareMatrix::operator*(const SquareMatrix& m) {
-	if (size != m.size)
-		throw invalid_argument("Matrix sizes must be equal");
+	//if (size != m.size)
+	//	throw invalid_argument("Matrix sizes must be equal");
 	// проверку условий можно убрать
 	SquareMatrix res(size);
 	const size_t n = size;
@@ -81,24 +81,6 @@ bool SquareMatrix::operator==(const SquareMatrix& m) {
 			if (array[i * size + j] != m.array[i * size + j]) return false;
 	return true;
 }
-
-SquareMatrix SquareMatrix::get_LU() {
-	SquareMatrix res(*this);
-	Type*& m = res.array;
-	size_t k_iter_max = size - 1;
-	for (size_t k = 0; k < k_iter_max; k++) {
-		Type* A_ik_p = m + k;
-		Type A_kk = m[k * size + k];
-		for (size_t i = k + 1; i < size; i++)
-			A_ik_p[i * size] /= A_kk;
-		for (size_t j = k + 1; j < size; j++) { // попробовать поменять местами, по возможности параллелим этот
-			Type U_kj = m[k * size + j];
-			for (size_t i = k + 1; i < size; i++)
-				m[i * size + j] -= A_ik_p[i * size] * U_kj;
-		}
-	}
-	return res;
-} 
 
 void SquareMatrix::decompose_LU(SquareMatrix& L, SquareMatrix& U) {
 	const size_t n = size;
@@ -148,4 +130,21 @@ ostream& operator<<(ostream& ostr, SquareMatrix& m) noexcept {
 		ostr << endl;
 	}
 	return ostr;
+}
+
+ void get_LU(SquareMatrix& matrix_pointer) {
+	Type*& m = matrix_pointer.get_array();
+	const size_t size = matrix_pointer.get_size();
+	size_t k_iter_max = size - 1;
+	for (size_t k = 0; k < k_iter_max; k++) {
+		Type* A_ik_p = m + k;
+		Type* U_ki_p = m + k * size;
+		Type A_kk = m[k * size + k];
+		for (size_t i = k + 1; i < size; i++) {
+			Type* A_irow = m + i * size;
+			A_ik_p[i * size] /= A_kk;
+			for (size_t j = k + 1; j < size; j++)
+				A_irow[j] -= A_ik_p[i * size] * U_ki_p[j];
+		}
+	}
 }

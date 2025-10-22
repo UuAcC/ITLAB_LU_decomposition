@@ -27,14 +27,19 @@ public:
 	SquareMatrix operator*(const SquareMatrix& m);
 	bool operator==(const SquareMatrix& m);
 
-	// сюда оператор круглые скобки и здесь же реализовать, чтоб был инлайн (индексация)
+	inline Type& operator()(size_t i, size_t j) { return array[i * size + j]; }
+	inline const Type& operator()(size_t i, size_t j) const { return array[i * size + j]; }
 
-	SquareMatrix get_LU(); // сделать войд принимать матрицу
+	inline Type*& get_array() { return array; }
+	inline const size_t get_size() const { return size; }
+	inline void set_array(Type*&& arr) { array = arr; }
+
 	// из матрицы, в которой хранятся L и U получает, соответственно, L и U
 	void decompose_LU(SquareMatrix& L, SquareMatrix& U);
-
 	friend void print_LU(const SquareMatrix& m);
 
 	friend istream& operator>>(istream& istr, SquareMatrix& m);
 	friend ostream& operator<<(ostream& ostr, SquareMatrix& m) noexcept;
 };
+
+void get_LU(SquareMatrix& matrix_pointer);
