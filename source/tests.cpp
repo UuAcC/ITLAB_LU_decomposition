@@ -12,6 +12,7 @@ std::vector<bool(*)()> TestSystem::tests;
 
 void TestSystem::add_tests() {
 	tests.push_back(TestSystem::test1);
+	tests.push_back(TestSystem::test2);
 }
 
 void TestSystem::run_all_tests() {
@@ -20,11 +21,15 @@ void TestSystem::run_all_tests() {
 	for (auto TestPtr : tests) {
 		last_res = (*TestPtr)();
 		std::cout << ((last_res) ? "true" : "false") << endl;
-	}
-	test_time(10);
+	} std::cout << endl;
+	test_time(10, 1000);
+	/*test_time(5, 3000);
+	test_time(1, 7000);
+	test_time(1, 10000);*/
 }
 
 bool TestSystem::test1() {
+	std::cout << endl;
 	const size_t n = 3;
 	Type arr[n * n]{ 
 		2, 3, 1, 
@@ -41,15 +46,39 @@ bool TestSystem::test1() {
 	SquareMatrix Res = L * U;
 
 	print_LU(LU);
-	std::cout << endl << Res;
-
-	std::cout << "Test1: ";
+	std::cout << "Matrix Res = L * U:\n" << Res
+		<< "Test1: ";
 	return A == Res;
 }
 
-bool TestSystem::test_time(size_t how_many_times) {
+bool TestSystem::test2() {
+	std::cout << endl;
+	const size_t n = 4;
+	Type arr[n * n]{
+		2, 3, 1, 1,
+		4, 7, 7, 1,
+		6, 18, 22, 1,
+		1, 1, 1, 1
+	};
+	SquareMatrix A(n, arr);
+	SquareMatrix LU(A);
+
+	get_LU(LU);
+
+	SquareMatrix L(n), U(n);
+	LU.decompose_LU(L, U);
+	SquareMatrix Res = L * U;
+
+	print_LU(LU);
+	std::cout << "Matrix Res = L * U:\n" << Res 
+		<< "Test2: ";
+	return A == Res;
+}
+
+bool TestSystem::test_time(size_t how_many_times, size_t _n) {
 	chrono::milliseconds time_init{0}, time_LU{0}, total_time{0};
-	const size_t n = 1000;
+	const size_t n = _n;
+	std::cout << "\nTesting with n = " << _n << ":";
 	for (size_t iter = 0; iter < how_many_times; iter++) {
 		TP start_init = NOW;
 		random_device rd;
@@ -74,6 +103,6 @@ bool TestSystem::test_time(size_t how_many_times) {
 	std::cout << "\nArithmetic mean of time for LU decomposition: ~"
 		<< time_LU.count() / how_many_times << "ms";
 	std::cout << "\nArithmetic mean of total time: ~"
-		<< total_time.count() / how_many_times << "ms";
+		<< total_time.count() / how_many_times << "ms\n";
 	return true;
 }

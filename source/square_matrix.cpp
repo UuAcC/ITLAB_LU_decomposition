@@ -1,4 +1,5 @@
 #include "square_matrix.h"
+#include <omp.h>
 
 SquareMatrix::SquareMatrix(size_t s, Type* in_arr) {
 	size = s;
@@ -50,9 +51,6 @@ const Type& SquareMatrix::at(size_t i, size_t j) const {
 }
 
 SquareMatrix SquareMatrix::operator*(const SquareMatrix& m) {
-	//if (size != m.size)
-	//	throw invalid_argument("Matrix sizes must be equal");
-	// проверку условий можно убрать
 	SquareMatrix res(size);
 	const size_t n = size;
 
@@ -140,11 +138,14 @@ ostream& operator<<(ostream& ostr, SquareMatrix& m) noexcept {
 		Type* A_ik_p = m + k;
 		Type* U_ki_p = m + k * size;
 		Type A_kk = m[k * size + k];
-		for (size_t i = k + 1; i < size; i++) {
+		#pragma omp parallel for schedule(dynamic, 20)
+		for (int i = k + 1; i < size; i++) {
+			Type* A_k_p = A_ik_p + i * size;
 			Type* A_irow = m + i * size;
-			A_ik_p[i * size] /= A_kk;
-			for (size_t j = k + 1; j < size; j++)
-				A_irow[j] -= A_ik_p[i * size] * U_ki_p[j];
+			(*A_k_p) /= A_kk;
+			#pragma omp simd
+			for (int j = k + 1; j < size; j++)
+				A_irow[j] -= (*A_k_p) * U_ki_p[j];
 		}
 	}
 }
